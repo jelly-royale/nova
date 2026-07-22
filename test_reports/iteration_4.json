@@ -1,0 +1,37 @@
+{
+  "summary": "Iteration 4 (revert edition-badge + stock-info + editorial hero, keep iteration-3 auth/emails). Full backend (15/15) + full frontend flows verified. Everything passes.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_iteration4.py", "/app/test_reports/pytest/iter4_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Home.jsx still uses a Pexels URL for the JOURNAL editorial section (line 138). User asked to replace 'the unsplash editorial hero image' — the main hero is now customer-assets (as requested), but the secondary editorial banner still pulls from pexels. If user's intent was to remove ALL third-party imagery, main agent should confirm and replace."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration4.py", "/app/test_reports/iteration_4.json"],
+  "success_rate": {"backend": "100% (15/15)", "frontend": "100% (all flows: home hero, product page reverted, login/register google, forgot/reset pages, no leaks on any public page, footer copyright, cart+checkout->stripe redirect, admin sidebar 8/8 items, admin products has Jelly, admin settings shows private company_info)"},
+  "test_credentials": "admin@novamilan.com / NovaAdmin2026!",
+  "seed_data_creation": "TEST_ prefixed users created by password-reset regression tests are cleaned up in-test; a few registration test users may persist (harmless).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend suite lives at /app/backend/tests/test_iteration4.py — 15 tests, all pass in ~2.6s. Uses REACT_APP_BACKEND_URL. Public settings leak check whitelists company_info/siret/kone/denfert/994 632 701/contact@novamilan.com. Admin settings values live in <input value=...> not innerText — use element .value or screenshot for verification. Product page has NO edition-badge or stock-info testids anymore; 9 swatches; images now all customer-assets URLs (6 total). Home hero uses customer-assets URL. Editorial banner still uses pexels (secondary, further down page).",
+  "checked_flows": {
+    "product_no_edition_badge": "PASS",
+    "product_no_stock_info": "PASS",
+    "product_9_swatches_add_wish_accordions": "PASS",
+    "home_hero_customer_assets": "PASS (naturalWidth>0)",
+    "GET /api/products/jelly no edition field": "PASS (null)",
+    "GET /api/products/jelly 6 customer-assets images": "PASS",
+    "google/session invalid -> 401": "PASS",
+    "password-reset request/confirm": "PASS (400 on bad token)",
+    "register no crash without RESEND_API_KEY": "PASS",
+    "login/register google-login-btn + forgot-link": "PASS",
+    "/forgot-password + /reset-password load": "PASS",
+    "cart -> checkout -> stripe.com redirect": "PASS (checkout.stripe.com)",
+    "admin sidebar 8/8 items": "PASS",
+    "admin products shows Jelly": "PASS",
+    "admin settings shows kone/denfert/SIRET/contact@novamilan.com": "PASS (verified via screenshot)",
+    "/api/settings/public no leak": "PASS",
+    "public pages (/, /maison, /contact, /legal/*) no leak": "PASS",
+    "footer copyright '© 2025 NOVA MILAN'": "PASS"
+  }
+}

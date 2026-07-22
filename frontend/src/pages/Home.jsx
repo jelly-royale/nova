@@ -20,12 +20,11 @@ export default function Home() {
       <section className="relative min-h-[88vh] md:min-h-[92vh] flex items-end overflow-hidden" data-testid="hero-section">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1509631179647-0177331693ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80"
-            alt="NOVA MILAN — Maison de luxe"
+            src="https://customer-assets-v7afamib.emergentagent.net/job_nova-digital-maison/artifacts/7sj62rtr_photo_20_2026-07-22_22-13-38.jpg"
+            alt="Collection Jelly NOVA MILAN"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/10" />
         </div>
         <div className="relative z-10 max-w-[1600px] mx-auto px-6 lg:px-12 pb-16 md:pb-24 text-nova-ivory w-full">
           <p className="nova-eyebrow nova-reveal">{t("home.eyebrow")}</p>

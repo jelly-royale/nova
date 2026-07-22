@@ -785,10 +785,12 @@ async def seed():
     variants = [{"color_key": k, "color_name": n, "hex": h, "stock": 25, "image": None} for k, n, h in colors]
 
     jelly_images = [
-        "https://images.unsplash.com/photo-1584917865442-de89df76afd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=85",
-        "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=85",
-        "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=85",
-        "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=85",
+        "https://customer-assets-v7afamib.emergentagent.net/job_nova-digital-maison/artifacts/vscki1wf_photo_18_2026-07-22_22-13-38.jpg",
+        "https://customer-assets-v7afamib.emergentagent.net/job_nova-digital-maison/artifacts/yfb7rizw_photo_16_2026-07-22_22-13-38.jpg",
+        "https://customer-assets-v7afamib.emergentagent.net/job_nova-digital-maison/artifacts/7yycavuo_photo_5_2026-07-22_22-13-38.jpg",
+        "https://customer-assets-v7afamib.emergentagent.net/job_nova-digital-maison/artifacts/n9quwrta_photo_7_2026-07-22_22-13-38.jpg",
+        "https://customer-assets-v7afamib.emergentagent.net/job_nova-digital-maison/artifacts/7sj62rtr_photo_20_2026-07-22_22-13-38.jpg",
+        "https://customer-assets-eiarnc6j.emergentagent.net/job_71160d4f-b98d-4d60-ace5-ba513ea63e38/artifacts/6gu21sy9_photo_21_2026-07-22_22-13-38.jpg",
     ]
 
     await db.products.insert_one({
@@ -796,15 +798,14 @@ async def seed():
         "name": "Jelly",
         "slug": "jelly",
         "category": "sacs",
-        "description": "Le sac Jelly incarne la signature NOVA MILAN : une silhouette architecturale héritée des grandes maisons italiennes, réinterprétée dans une matière contemporaine translucide. Un manifeste de modernité, façonné avec précision.",
-        "material": "PVC premium translucide, ferrure argent poli, cadenas signature",
+        "description": "Le sac Jelly incarne la signature NOVA MILAN : une silhouette architecturale héritée des grandes maisons italiennes, réinterprétée dans une matière contemporaine. Un manifeste de modernité, façonné avec précision.",
+        "material": "Cuir souple italien, ferrure argent poli, cadenas signature",
         "price": 890.0,
         "currency": "EUR",
         "images": jelly_images,
         "variants": variants,
         "featured": True,
         "active": True,
-        "edition": "Édition Confidentielle",
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
 
