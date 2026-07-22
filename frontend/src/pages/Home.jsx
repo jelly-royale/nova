@@ -20,20 +20,24 @@ export default function Home() {
       <section className="relative min-h-[88vh] md:min-h-[92vh] flex items-end overflow-hidden" data-testid="hero-section">
         <div className="absolute inset-0">
           <img
-            src="https://customer-assets.emergentagent.com/job_nova-digital-maison/artifacts/g3nmvhgy_IMG_4150.jpeg"
-            alt="Collection Jelly NOVA MILAN"
+            src="https://images.unsplash.com/photo-1509631179647-0177331693ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80"
+            alt="NOVA MILAN — Maison de luxe"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
         </div>
         <div className="relative z-10 max-w-[1600px] mx-auto px-6 lg:px-12 pb-16 md:pb-24 text-nova-ivory w-full">
           <p className="nova-eyebrow nova-reveal">{t("home.eyebrow")}</p>
           <h1 className="nova-h1 text-4xl sm:text-5xl md:text-7xl lg:text-8xl mt-6 max-w-4xl nova-reveal nova-reveal-d1">
             {t("home.hero_title")}
           </h1>
-          <p className="mt-6 md:mt-8 max-w-xl text-sm md:text-base text-white/80 nova-reveal nova-reveal-d2">{t("home.hero_sub")}</p>
-          <div className="mt-8 md:mt-10 flex gap-4 nova-reveal nova-reveal-d3">
+          <p className="mt-6 md:mt-8 max-w-xl text-sm md:text-base text-white/85 nova-reveal nova-reveal-d2">{t("home.hero_sub")}</p>
+          <div className="mt-8 md:mt-10 flex flex-wrap gap-4 nova-reveal nova-reveal-d3">
             <Link to="/collections" className="nova-btn" data-testid="hero-cta-collection">{t("home.discover")}</Link>
+            <Link to="/product/jelly" className="text-nova-ivory text-xs uppercase tracking-[0.28em] py-4 border-b border-nova-ivory/40 hover:border-nova-gold hover:text-nova-gold transition-colors">
+              Le sac Jelly →
+            </Link>
           </div>
         </div>
       </section>

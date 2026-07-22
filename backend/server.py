@@ -10,15 +10,20 @@ import bcrypt
 import jwt
 import stripe
 import shutil
+import secrets
+import httpx
 from bson import ObjectId
 from dotenv import load_dotenv
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Query, UploadFile, File
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Query, UploadFile, File, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient as SyncMongoClient
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from starlette.middleware.cors import CORSMiddleware
+
+# Local
+import email_service
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
@@ -181,7 +186,7 @@ async def root():
 
 # ---------- Auth Routes ----------
 @api.post("/auth/register")
-async def register(payload: UserRegister):
+async def register(payload: UserRegister, background: BackgroundTasks):
     existing = await db.users.find_one({"email": payload.email.lower()})
     if existing:
         raise HTTPException(400, "Un compte existe déjà avec cet email")
@@ -192,6 +197,7 @@ async def register(payload: UserRegister):
         "first_name": payload.first_name,
         "last_name": payload.last_name,
         "role": "customer",
+        "provider": "email",
         "addresses": [],
         "wishlist": [],
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -200,6 +206,7 @@ async def register(payload: UserRegister):
     token = make_token(user["id"], user["role"])
     user.pop("password", None)
     user.pop("_id", None)
+    background.add_task(email_service.send_welcome, user["email"], user["first_name"], "fr")
     return {"token": token, "user": user}
 
 @api.post("/auth/login")
@@ -222,6 +229,103 @@ async def update_me(payload: dict, user=Depends(require_user)):
     await db.users.update_one({"id": user["id"]}, {"$set": allowed})
     updated = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})
     return updated
+
+# ---------- Google Auth (Emergent-managed) ----------
+class GoogleSessionExchange(BaseModel):
+    session_id: str
+
+@api.post("/auth/google/session")
+async def google_session(payload: GoogleSessionExchange, background: BackgroundTasks):
+    """Exchange Emergent session_id for our JWT.
+    REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+    """
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            r = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": payload.session_id},
+            )
+        if r.status_code != 200:
+            raise HTTPException(401, "Session Google invalide")
+        data = r.json()
+    except httpx.HTTPError as e:
+        raise HTTPException(502, f"Erreur communication Google: {e}")
+
+    email = (data.get("email") or "").lower()
+    if not email:
+        raise HTTPException(400, "Email manquant")
+    name = data.get("name") or ""
+    parts = name.split(" ", 1)
+    first_name = parts[0] or "Client"
+    last_name = parts[1] if len(parts) > 1 else ""
+
+    user = await db.users.find_one({"email": email})
+    is_new = False
+    if user:
+        await db.users.update_one({"id": user["id"]}, {"$set": {"picture": data.get("picture"), "provider": user.get("provider", "google")}})
+    else:
+        is_new = True
+        user = {
+            "id": str(uuid.uuid4()),
+            "email": email,
+            "password": "",  # OAuth user, no local password
+            "first_name": first_name,
+            "last_name": last_name,
+            "picture": data.get("picture"),
+            "role": "customer",
+            "provider": "google",
+            "addresses": [],
+            "wishlist": [],
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        await db.users.insert_one(user)
+    token = make_token(user["id"], user["role"])
+    user.pop("password", None)
+    user.pop("_id", None)
+    if is_new:
+        background.add_task(email_service.send_welcome, email, first_name, "fr")
+    return {"token": token, "user": user}
+
+# ---------- Password reset ----------
+class PwResetRequest(BaseModel):
+    email: EmailStr
+
+class PwResetConfirm(BaseModel):
+    token: str
+    new_password: str = Field(min_length=6)
+
+@api.post("/auth/password-reset/request")
+async def request_password_reset(payload: PwResetRequest, request: Request, background: BackgroundTasks):
+    user = await db.users.find_one({"email": payload.email.lower()})
+    # Always return ok (avoid email enumeration)
+    if user and user.get("provider", "email") == "email":
+        token = secrets.token_urlsafe(32)
+        await db.password_resets.insert_one({
+            "token": token,
+            "user_id": user["id"],
+            "email": user["email"],
+            "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+            "used": False,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        origin = str(request.headers.get("origin") or request.headers.get("referer") or "").rstrip("/")
+        if not origin:
+            origin = ""
+        reset_url = f"{origin}/reset-password?token={token}"
+        background.add_task(email_service.send_password_reset, user["email"], reset_url, "fr")
+    return {"ok": True}
+
+@api.post("/auth/password-reset/confirm")
+async def confirm_password_reset(payload: PwResetConfirm):
+    rec = await db.password_resets.find_one({"token": payload.token, "used": False})
+    if not rec:
+        raise HTTPException(400, "Lien invalide ou déjà utilisé")
+    expires = datetime.fromisoformat(rec["expires_at"])
+    if expires < datetime.now(timezone.utc):
+        raise HTTPException(400, "Lien expiré")
+    await db.users.update_one({"id": rec["user_id"]}, {"$set": {"password": hash_password(payload.new_password)}})
+    await db.password_resets.update_one({"token": payload.token}, {"$set": {"used": True}})
+    return {"ok": True}
 
 # ---------- Products ----------
 @api.get("/products")
@@ -341,7 +445,7 @@ async def _compute_totals(items: List[CartItemIn], promo_code: Optional[str]):
     return line_items, subtotal, discount, shipping, total
 
 @api.post("/checkout")
-async def checkout(payload: CheckoutRequest, user=Depends(get_current_user)):
+async def checkout(payload: CheckoutRequest, background: BackgroundTasks, user=Depends(get_current_user)):
     line_items, subtotal, discount, shipping, total = await _compute_totals(payload.items, payload.promo_code)
     order_id = str(uuid.uuid4())
     order_number = "NM" + datetime.now(timezone.utc).strftime("%y%m%d") + order_id[:5].upper()
@@ -407,7 +511,7 @@ async def checkout(payload: CheckoutRequest, user=Depends(get_current_user)):
     return {"checkout_url": session.url, "session_id": session.id, "order_id": order_id}
 
 @api.get("/payments/status/{session_id}")
-async def payment_status(session_id: str):
+async def payment_status(session_id: str, background: BackgroundTasks):
     record = payment_transactions.find_one({"session_id": session_id})
     if not record:
         raise HTTPException(404, "Transaction introuvable")
@@ -415,7 +519,7 @@ async def payment_status(session_id: str):
         try:
             s = stripe.checkout.Session.retrieve(session_id)
             if s.payment_status == "paid" or s.status == "complete":
-                payment_transactions.update_one(
+                updated = payment_transactions.update_one(
                     {"session_id": session_id, "payment_status": {"$ne": "paid"}},
                     {"$set": {"status": "completed", "payment_status": "paid", "updated_at": datetime.now(timezone.utc)}},
                 )
@@ -423,6 +527,10 @@ async def payment_status(session_id: str):
                     {"session_id": session_id, "payment_status": {"$ne": "paid"}},
                     {"$set": {"payment_status": "paid", "status": "paid"}},
                 )
+                if updated.modified_count > 0:
+                    order = await db.orders.find_one({"session_id": session_id}, {"_id": 0})
+                    if order and order.get("email"):
+                        background.add_task(email_service.send_payment_confirmation, order["email"], order, "fr")
                 record = payment_transactions.find_one({"session_id": session_id})
         except stripe.error.StripeError:
             pass
@@ -435,7 +543,7 @@ async def payment_status(session_id: str):
     }
 
 @api.post("/stripe/webhook")
-async def stripe_webhook(request: Request):
+async def stripe_webhook(request: Request, background: BackgroundTasks):
     payload = await request.body()
     sig = request.headers.get("stripe-signature", "")
     try:
@@ -444,7 +552,7 @@ async def stripe_webhook(request: Request):
         raise HTTPException(400, "Invalid signature")
     obj, t = event["data"]["object"], event["type"]
     if t == "checkout.session.completed":
-        payment_transactions.update_one(
+        updated = payment_transactions.update_one(
             {"session_id": obj["id"], "payment_status": {"$ne": "paid"}},
             {"$set": {"status": "completed", "payment_status": obj.get("payment_status", "paid"), "updated_at": datetime.now(timezone.utc)}},
         )
@@ -452,6 +560,10 @@ async def stripe_webhook(request: Request):
             {"session_id": obj["id"], "payment_status": {"$ne": "paid"}},
             {"$set": {"payment_status": "paid", "status": "paid"}},
         )
+        if updated.modified_count > 0:
+            order = await db.orders.find_one({"session_id": obj["id"]}, {"_id": 0})
+            if order and order.get("email"):
+                background.add_task(email_service.send_payment_confirmation, order["email"], order, "fr")
     return {"status": "ok"}
 
 @api.get("/orders")
@@ -470,12 +582,17 @@ async def admin_orders(admin=Depends(require_admin)):
     return await db.orders.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
 
 @api.put("/admin/orders/{order_id}")
-async def admin_update_order(order_id: str, payload: OrderStatusUpdate, admin=Depends(require_admin)):
+async def admin_update_order(order_id: str, payload: OrderStatusUpdate, background: BackgroundTasks, admin=Depends(require_admin)):
     update = {"status": payload.status}
     if payload.tracking_number:
         update["tracking_number"] = payload.tracking_number
+    previous = await db.orders.find_one({"id": order_id}, {"_id": 0})
     await db.orders.update_one({"id": order_id}, {"$set": update})
-    return await db.orders.find_one({"id": order_id}, {"_id": 0})
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    # Trigger shipment email when status flips to shipped
+    if previous and previous.get("status") != "shipped" and payload.status == "shipped" and order.get("email"):
+        background.add_task(email_service.send_shipment_notification, order["email"], order, payload.tracking_number, "fr")
+    return order
 
 # ---------- Customers (admin) ----------
 @api.get("/admin/customers")
@@ -668,10 +785,10 @@ async def seed():
     variants = [{"color_key": k, "color_name": n, "hex": h, "stock": 25, "image": None} for k, n, h in colors]
 
     jelly_images = [
-        "https://images.unsplash.com/photo-1718254309963-49ce69a853df?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHx0cmFuc3BhcmVudCUyMGplbGx5JTIwdG90ZSUyMGJhZyUyMHBhc3RlbHxlbnwwfHx8fDE3ODQ3NTIzNzl8MA&ixlib=rb-4.1.0&q=85",
-        "https://images.unsplash.com/photo-1556228578-6b39aba552d5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwzfHx0cmFuc3BhcmVudCUyMGplbGx5JTIwdG90ZSUyMGJhZyUyMHBhc3RlbHxlbnwwfHx8fDE3ODQ3NTIzNzl8MA&ixlib=rb-4.1.0&q=85",
-        "https://customer-assets.emergentagent.com/job_nova-digital-maison/artifacts/uzuny7dh_IMG_4148.jpeg",
-        "https://customer-assets.emergentagent.com/job_nova-digital-maison/artifacts/vhhcvatg_IMG_4149.jpeg",
+        "https://images.unsplash.com/photo-1584917865442-de89df76afd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=85",
+        "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=85",
+        "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=85",
+        "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=85",
     ]
 
     await db.products.insert_one({
@@ -687,6 +804,7 @@ async def seed():
         "variants": variants,
         "featured": True,
         "active": True,
+        "edition": "Édition Confidentielle",
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
 

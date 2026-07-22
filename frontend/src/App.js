@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Layout from "@/components/Layout";
 import Home from "@/pages/Home";
@@ -16,10 +16,14 @@ import Contact from "@/pages/Contact";
 import Legal from "@/pages/Legal";
 import TrackOrder from "@/pages/TrackOrder";
 import Admin from "@/pages/Admin";
+import AuthCallback from "@/pages/AuthCallback";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/collections" element={<Collections />} />
@@ -30,6 +34,8 @@ export default function App() {
         <Route path="/payment/cancel" element={<PaymentCancel />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/account" element={<Account />} />
         <Route path="/maison" element={<Maison />} />
         <Route path="/journal" element={<Journal />} />

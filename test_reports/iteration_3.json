@@ -1,0 +1,50 @@
+{
+  "summary": "Iteration 3 — validated deferred email service (SKIPPED gracefully with empty RESEND_API_KEY), Google Auth session endpoint (401 on invalid), full password-reset flow (request→DB token→confirm→login with new password→reused token=400), Jelly edition badge + per-variant stock, luxury hero image, and full regression. 20/20 backend tests pass. All frontend testids present and functional.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration3.py",
+    "/app/backend/tests/test_nova_milan.py",
+    "/app/test_reports/pytest/iter3_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py is now ~860 lines — consider splitting into routers (auth, products, media, admin, checkout) for maintainability.",
+    "In /auth/password-reset/request, `origin` is derived from request headers (referer/origin). If both are missing, the emailed reset URL becomes '/reset-password?token=...' (no host). Emails are currently no-ops (RESEND empty) so no user-facing impact today, but before enabling Resend, fall back to a configured PUBLIC_APP_URL env var.",
+    "email_service.send_* are properly wrapped for no-op when RESEND_API_KEY is empty and logged as INFO — verified in supervisor logs.",
+    "Google session endpoint correctly returns 401 for invalid session_id (not 500). Full flow with real Emergent session not automated (documented mock)."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration3.py (new)"],
+  "success_rate": {"backend": "100% (20/20)", "frontend": "100% critical flows"},
+  "test_credentials": "admin@novamilan.com / NovaAdmin2026! — worked",
+  "seed_data_creation": "Test users created via /auth/register are cleaned up in-test (TEST_ prefix). password_resets rows for test users cleaned up.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Iteration 3 test suite at /app/backend/tests/test_iteration3.py verifies emails-deferred, password reset (with DB verification via pymongo), Google session invalid path, Jelly edition+stock, and Stripe checkout regression. Frontend testids confirmed: google-login-btn (on /login and /register), forgot-link, forgot-password-page, forgot-email, forgot-submit, reset-submit, edition-badge, stock-info. Hero image loads at natural width 2400. Google button hardcoded to https://auth.emergentagent.com/?redirect=<origin>/auth/callback in GoogleAuth.jsx.",
+  "verified": {
+    "email_deferred_no_crash": true,
+    "email_skipped_log_seen": true,
+    "password_reset_full_cycle": true,
+    "password_reset_no_enumeration": true,
+    "password_reset_token_in_db": true,
+    "invalid_reset_token_400": true,
+    "reused_token_400": true,
+    "google_session_invalid_401": true,
+    "jelly_edition_field": "Édition Confidentielle",
+    "jelly_variants_have_stock_int": true,
+    "checkout_to_stripe": true,
+    "public_settings_no_leak": true,
+    "frontend_login_google_btn_and_forgot_link": true,
+    "frontend_register_google_btn": true,
+    "frontend_forgot_page_flow": true,
+    "frontend_reset_invalid_token_error": true,
+    "frontend_product_edition_badge_visible": "Édition Confidentielle",
+    "frontend_stock_info_visible": "Disponible — expédition sous 24 à 72h",
+    "frontend_hero_loaded": true,
+    "google_redirect_target": "https://auth.emergentagent.com/?redirect=<origin>/auth/callback"
+  }
+}

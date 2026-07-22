@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useI18n } from "@/contexts/I18nContext";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { GoogleLoginButton } from "@/components/GoogleAuth";
 
 export default function Register() {
   const { register } = useAuth();
@@ -29,7 +30,15 @@ export default function Register() {
         <form onSubmit={submit} className="w-full max-w-sm">
           <p className="nova-eyebrow mb-4">NOVA MILAN</p>
           <h1 className="nova-h1 text-4xl mb-4">{t("auth.register_title")}</h1>
-          <p className="text-sm text-black/60 mb-10">{t("auth.register_sub")}</p>
+          <p className="text-sm text-black/60 mb-8">{t("auth.register_sub")}</p>
+
+          <GoogleLoginButton label="S'inscrire avec Google" />
+          <div className="flex items-center gap-4 my-6">
+            <div className="h-px bg-black/10 flex-1" />
+            <span className="text-[10px] uppercase tracking-widest text-black/40">ou</span>
+            <div className="h-px bg-black/10 flex-1" />
+          </div>
+
           <div className="space-y-6">
             {[["first_name", t("account.first_name")], ["last_name", t("account.last_name")], ["email", t("account.email")], ["password", t("account.password")]].map(([k, label]) => (
               <div key={k}>

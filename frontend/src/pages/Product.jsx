@@ -72,8 +72,14 @@ export default function Product() {
         {/* Details */}
         <div className="lg:sticky lg:top-32 self-start">
           <p className="nova-eyebrow mb-3">NOVA MILAN — SIGNATURE</p>
-          <h1 className="nova-h1 text-4xl md:text-6xl mb-4" data-testid="product-name">{product.name}</h1>
-          <p className="text-lg mb-8" data-testid="product-price">{product.price.toFixed(2)} €</p>
+          <h1 className="nova-h1 text-4xl md:text-6xl mb-2" data-testid="product-name">{product.name}</h1>
+          {product.edition && (
+            <div className="inline-flex items-center gap-2 border border-nova-gold px-3 py-1 mb-4" data-testid="edition-badge">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-nova-gold" />
+              <span className="text-[10px] uppercase tracking-[0.28em] text-nova-gold">{product.edition}</span>
+            </div>
+          )}
+          <p className="text-lg mb-6" data-testid="product-price">{product.price.toFixed(2)} €</p>
 
           <p className="text-black/70 leading-relaxed mb-8 max-w-md">{product.description}</p>
 
@@ -93,6 +99,17 @@ export default function Product() {
                 />
               ))}
             </div>
+            {selected && (
+              <p className="text-xs mt-4" data-testid="stock-info">
+                {selected.stock > 5 ? (
+                  <span className="text-black/60">Disponible — expédition sous 24 à 72h</span>
+                ) : selected.stock > 0 ? (
+                  <span className="text-nova-gold">Il ne reste que {selected.stock} pièces dans ce coloris</span>
+                ) : (
+                  <span className="text-red-700">Coloris temporairement épuisé</span>
+                )}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-4 mb-6">

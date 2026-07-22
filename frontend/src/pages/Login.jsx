@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useI18n } from "@/contexts/I18nContext";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { GoogleLoginButton } from "@/components/GoogleAuth";
 
 export default function Login() {
   const { login } = useAuth();
@@ -33,7 +34,15 @@ export default function Login() {
         <form onSubmit={submit} className="w-full max-w-sm">
           <p className="nova-eyebrow mb-4">NOVA MILAN</p>
           <h1 className="nova-h1 text-4xl mb-4">{t("auth.login_title")}</h1>
-          <p className="text-sm text-black/60 mb-10">{t("auth.login_sub")}</p>
+          <p className="text-sm text-black/60 mb-8">{t("auth.login_sub")}</p>
+
+          <GoogleLoginButton label="Continuer avec Google" />
+          <div className="flex items-center gap-4 my-6">
+            <div className="h-px bg-black/10 flex-1" />
+            <span className="text-[10px] uppercase tracking-widest text-black/40">ou</span>
+            <div className="h-px bg-black/10 flex-1" />
+          </div>
+
           <div className="space-y-6">
             <div>
               <label className="text-xs uppercase tracking-widest text-black/60">{t("account.email")}</label>
@@ -45,6 +54,9 @@ export default function Login() {
             </div>
           </div>
           <button className="nova-btn w-full mt-8" disabled={loading} data-testid="login-submit">{loading ? "…" : t("nav.login")}</button>
+          <div className="flex justify-between items-center mt-4">
+            <Link to="/forgot-password" className="text-xs uppercase tracking-widest text-black/50 hover:text-black" data-testid="forgot-link">Mot de passe oublié ?</Link>
+          </div>
           <p className="text-sm text-black/60 mt-8">{t("auth.no_account")} <Link to="/register" className="underline">{t("nav.register")}</Link></p>
         </form>
       </div>
