@@ -135,8 +135,8 @@ export default function Home() {
 
       {/* EDITORIAL */}
       <section className="relative h-[70vh] overflow-hidden">
-        <img src="https://images.pexels.com/photos/14916457/pexels-photo-14916457.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" alt="Éditorial" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/30 flex items-center">
+        <img src="https://customer-assets-v7afamib.emergentagent.net/job_nova-digital-maison/artifacts/7yycavuo_photo_5_2026-07-22_22-13-38.jpg" alt="Éditorial NOVA MILAN" className="w-full h-full object-cover object-center" />
+        <div className="absolute inset-0 bg-black/45 flex items-center">
           <div className="max-w-[1600px] mx-auto px-6 lg:px-12 text-nova-ivory">
             <p className="nova-eyebrow text-nova-gold">JOURNAL — CHAPITRE 01</p>
             <h3 className="nova-h2 text-3xl md:text-5xl mt-4 max-w-xl">L'art de porter la transparence.</h3>
