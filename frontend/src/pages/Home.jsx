@@ -17,35 +17,35 @@ export default function Home() {
   return (
     <div className="bg-nova-ivory">
       {/* HERO */}
-      <section className="relative h-[92vh] flex items-end overflow-hidden" data-testid="hero-section">
+      <section className="relative min-h-[88vh] md:min-h-[92vh] flex items-end overflow-hidden" data-testid="hero-section">
         <div className="absolute inset-0">
           <img
             src="https://customer-assets.emergentagent.com/job_nova-digital-maison/artifacts/g3nmvhgy_IMG_4150.jpeg"
             alt="Collection Jelly NOVA MILAN"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         </div>
-        <div className="relative z-10 max-w-[1600px] mx-auto px-6 lg:px-12 pb-24 text-nova-ivory">
+        <div className="relative z-10 max-w-[1600px] mx-auto px-6 lg:px-12 pb-16 md:pb-24 text-nova-ivory w-full">
           <p className="nova-eyebrow nova-reveal">{t("home.eyebrow")}</p>
-          <h1 className="nova-h1 text-5xl md:text-7xl lg:text-8xl mt-6 max-w-4xl nova-reveal nova-reveal-d1">
+          <h1 className="nova-h1 text-4xl sm:text-5xl md:text-7xl lg:text-8xl mt-6 max-w-4xl nova-reveal nova-reveal-d1">
             {t("home.hero_title")}
           </h1>
-          <p className="mt-8 max-w-xl text-sm md:text-base text-white/80 nova-reveal nova-reveal-d2">{t("home.hero_sub")}</p>
-          <div className="mt-10 flex gap-4 nova-reveal nova-reveal-d3">
+          <p className="mt-6 md:mt-8 max-w-xl text-sm md:text-base text-white/80 nova-reveal nova-reveal-d2">{t("home.hero_sub")}</p>
+          <div className="mt-8 md:mt-10 flex gap-4 nova-reveal nova-reveal-d3">
             <Link to="/collections" className="nova-btn" data-testid="hero-cta-collection">{t("home.discover")}</Link>
           </div>
         </div>
       </section>
 
       {/* Marquee */}
-      <section className="border-y border-black/10 py-6 bg-nova-ivory overflow-hidden">
+      <section className="border-y border-black/10 py-4 md:py-6 bg-nova-ivory overflow-hidden">
         <div className="marquee">
           <div className="marquee-track whitespace-nowrap">
             {[...Array(2)].map((_, k) => (
-              <div key={k} className="flex items-center gap-12 pr-12">
+              <div key={k} className="flex items-center gap-8 md:gap-12 pr-8 md:pr-12">
                 {["JELLY — LA SIGNATURE", "MADE IN ITALY", "LIVRAISON PREMIUM", "MAISON DE LUXE", "MILANO — PARIS — LONDON", "COLLECTION 2026"].map((w, i) => (
-                  <span key={i} className="font-serif-display text-2xl tracking-[0.3em] flex items-center gap-12">
+                  <span key={i} className="font-serif-display text-lg md:text-2xl tracking-[0.3em] flex items-center gap-8 md:gap-12">
                     {w} <span className="nova-gold">✦</span>
                   </span>
                 ))}

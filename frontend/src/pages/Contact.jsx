@@ -38,9 +38,8 @@ export default function Contact() {
           <button disabled={loading} className="nova-btn" data-testid="contact-submit">{loading ? "…" : "Envoyer"}</button>
         </form>
         <div className="mt-16 text-sm text-black/60 space-y-1">
-          <p>service.client@novamilan.com</p>
+          <p>Notre service client répond sous 48 heures ouvrées.</p>
           <p>Du lundi au vendredi — 9h à 19h CET</p>
-          <p className="text-black/40 mt-2">[Adresse & téléphone à compléter]</p>
         </div>
       </div>
       <div className="hidden md:block relative">

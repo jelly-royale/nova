@@ -67,12 +67,12 @@ export default function Navbar() {
         </nav>
 
         {/* Logo */}
-        <Link to="/" className="font-serif-display text-2xl lg:text-3xl tracking-[0.2em] font-normal" data-testid="nova-logo">
+        <Link to="/" className="font-serif-display text-lg sm:text-xl lg:text-3xl tracking-[0.15em] lg:tracking-[0.2em] font-normal whitespace-nowrap" data-testid="nova-logo">
           NOVA <span className="nova-gold">MILAN</span>
         </Link>
 
         {/* Right actions */}
-        <div className="flex items-center gap-4 lg:gap-6 flex-1 justify-end">
+        <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 flex-1 justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="hidden sm:flex items-center gap-1 text-xs tracking-widest uppercase" data-testid="language-selector">

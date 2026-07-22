@@ -78,13 +78,13 @@ export default function Footer() {
             <p className="nova-eyebrow text-nova-gold mb-4">NOVA MILAN</p>
             <p className="text-sm text-white/60 leading-relaxed">
               Milano · Paris · London<br/>
-              <span className="text-white/40">[Informations entreprise à compléter]</span>
+              Maison de maroquinerie contemporaine.
             </p>
           </div>
         </div>
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-white/40 tracking-wider">© {new Date().getFullYear()} NOVA MILAN — {t("footer.rights")}</p>
+          <p className="text-xs text-white/40 tracking-wider" data-testid="copyright">© 2025 NOVA MILAN. {t("footer.rights")}.</p>
           <p className="font-serif-display text-lg tracking-[0.4em]">NOVA MILAN</p>
         </div>
       </div>

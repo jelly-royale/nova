@@ -9,9 +9,11 @@ from typing import Optional, List
 import bcrypt
 import jwt
 import stripe
+import shutil
 from bson import ObjectId
 from dotenv import load_dotenv
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Query, UploadFile, File
+from fastapi.responses import FileResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient as SyncMongoClient
@@ -20,6 +22,10 @@ from starlette.middleware.cors import CORSMiddleware
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
+
+UPLOAD_DIR = ROOT_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+ALLOWED_IMG = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"}
 
 # ---------- MongoDB ----------
 mongo_url = os.environ["MONGO_URL"]
@@ -162,7 +168,7 @@ class SettingsUpdate(BaseModel):
     ga_id: Optional[str] = None
     meta_pixel_id: Optional[str] = None
     tiktok_pixel_id: Optional[str] = None
-    company_info: Optional[dict] = None
+    company_info: Optional[dict] = None  # PRIVATE — jamais exposé publiquement
 
 # ---------- App ----------
 app = FastAPI(title="NOVA MILAN API")
@@ -526,12 +532,60 @@ async def create_review(payload: ReviewCreate, user=Depends(require_user)):
 @api.get("/settings/public")
 async def public_settings():
     s = await db.settings.find_one({"_id": "global"}) or {}
+    # Return ONLY public analytics IDs — NEVER company_info (which contains SIRET, address, etc.)
     return {
         "ga_id": s.get("ga_id", ""),
         "meta_pixel_id": s.get("meta_pixel_id", ""),
         "tiktok_pixel_id": s.get("tiktok_pixel_id", ""),
         "stripe_publishable_key": os.environ.get("STRIPE_PUBLISHABLE_KEY", ""),
     }
+
+# ---------- Media library ----------
+@api.post("/admin/media/upload")
+async def upload_media(file: UploadFile = File(...), admin=Depends(require_admin)):
+    ext = Path(file.filename or "").suffix.lower()
+    if ext not in ALLOWED_IMG:
+        raise HTTPException(400, f"Format non supporté ({ext}). Utilisez JPG, PNG, WEBP, GIF, AVIF.")
+    file_id = str(uuid.uuid4())
+    stored_name = f"{file_id}{ext}"
+    dest = UPLOAD_DIR / stored_name
+    with dest.open("wb") as f:
+        shutil.copyfileobj(file.file, f)
+    size = dest.stat().st_size
+    doc = {
+        "id": file_id,
+        "filename": stored_name,
+        "original_name": file.filename,
+        "size": size,
+        "url": f"/api/media/{stored_name}",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.media.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+@api.get("/media/{filename}")
+async def serve_media(filename: str):
+    path = UPLOAD_DIR / filename
+    if not path.exists() or not path.is_file():
+        raise HTTPException(404, "Fichier introuvable")
+    return FileResponse(path)
+
+@api.get("/admin/media")
+async def list_media(admin=Depends(require_admin)):
+    return await db.media.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+
+@api.delete("/admin/media/{file_id}")
+async def delete_media(file_id: str, admin=Depends(require_admin)):
+    doc = await db.media.find_one({"id": file_id})
+    if not doc:
+        raise HTTPException(404, "Introuvable")
+    try:
+        (UPLOAD_DIR / doc["filename"]).unlink(missing_ok=True)
+    except Exception:
+        pass
+    await db.media.delete_one({"id": file_id})
+    return {"ok": True}
 
 @api.get("/admin/settings")
 async def admin_get_settings(admin=Depends(require_admin)):
@@ -664,6 +718,19 @@ logger = logging.getLogger("nova")
 async def _startup():
     try:
         await seed()
+        # Seed private company info (admin-only, never exposed publicly)
+        existing = await db.settings.find_one({"_id": "global"})
+        if not existing or not existing.get("company_info"):
+            await db.settings.update_one(
+                {"_id": "global"},
+                {"$set": {"company_info": {
+                    "name": "kone ismael",
+                    "address": "14 rue denfert rochereau",
+                    "siret": "994 632 701 R.C.S. chambey",
+                    "email": "contact@novamilan.com",
+                }}},
+                upsert=True,
+            )
         logger.info("Nova seed executed.")
     except Exception as e:
         logger.warning(f"Seed failed: {e}")
