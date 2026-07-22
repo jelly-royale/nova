@@ -1,0 +1,118 @@
+{
+  "theme": "hybrid",
+  "typography": {
+    "headings": {
+      "fontFamily": "Playfair Display",
+      "import_url": "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap",
+      "usage": "H1-H6, Editorials, Collection Titles",
+      "style": "High-contrast serif, tracking-tight, elegant. Use font-light or font-black, avoid generic bold."
+    },
+    "body": {
+      "fontFamily": "Manrope",
+      "import_url": "https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap",
+      "usage": "Paragraphs, Buttons, UI Elements, Admin Dashboard",
+      "style": "Clean, geometric sans-serif for high legibility and contemporary feel."
+    }
+  },
+  "colors": {
+    "brand": {
+      "deep_black": "#0A0A0A",
+      "ivory": "#FDFBF7",
+      "champagne_gold": "#E5C158",
+      "sand_beige": "#D8CBB6",
+      "soft_gray": "#F4F4F0"
+    },
+    "store_front": {
+      "background": "#FDFBF7",
+      "text": "#0A0A0A",
+      "accent": "#E5C158"
+    },
+    "admin_dashboard": {
+      "background": "#F4F4F0",
+      "card_bg": "#FFFFFF",
+      "text": "#0A0A0A",
+      "sidebar": "#0A0A0A",
+      "sidebar_text": "#FDFBF7"
+    }
+  },
+  "visual_enhancers": {
+    "store_front": [
+      "Generous white space (p-16 to p-32)",
+      "Editorial minimalism with single-focal-point layouts",
+      "Crystal Glassmorphism for sticky navigation (backdrop-blur-2xl bg-white/70, border-b border-black/5)",
+      "High quality cinematic imagery",
+      "Subtle parallax and smooth scrolling using framer-motion",
+      "Hover states: image zoom, subtle overlay"
+    ],
+    "admin_dashboard": [
+      "Dense, high-utility layout (The Technical Look)",
+      "Cardless or subtle borders (border-collapse style)",
+      "Sharp edges, max 4px border radius",
+      "Clear visual hierarchy with monochrome base + brand accent"
+    ]
+  },
+  "layouts": {
+    "store_front": {
+      "hero": "Full screen cinematic hero or split screen. Playfair Display H1 text-6xl+ overlaid on imagery with max bg-black/30 or bg-white/20.",
+      "product_grid": "Asymmetric bento grid. Mix col-span-4 and col-span-8 to create editorial tension.",
+      "product_page": "Immersive split layout. Left side: sticky product images with scroll snap. Right side: scrolling product details, color swatches (jaune, bleu, vert, rose, fuchsia, turquoise, blanc cristal, noir, violet).",
+      "navigation": "Minimalist header, logo centered or left, language selector (flags), cart drawer toggle. Megamenu for categories."
+    },
+    "admin_dashboard": {
+      "layout": "Sidebar navigation (dark mode) + Topbar (light mode) + Main Content Area.",
+      "widgets": "High density grid (grid-cols-4), tight gaps (gap-4). Use Shadcn tables, charts, cards."
+    }
+  },
+  "component_guidelines": {
+    "store_front": "Use raw HTML + Tailwind + Framer Motion. AVOID Shadcn Card/Section components for layout to maintain creative freedom. Use Shadcn for Form, Select, Dialog (Drawer).",
+    "admin_dashboard": "Use Shadcn components extensively (Tables, Cards, Dialogs, Select, Tabs, Recharts).",
+    "buttons": "Pill-shaped or sharp contemporary buttons. For primary CTA: bg-[#0A0A0A] text-[#FDFBF7] hover:bg-[#0A0A0A]/80.",
+    "icons": "Use lucide-react for both store and admin."
+  },
+  "motion": {
+    "store_front": "Use framer-motion. Staggered fade-up for text, scale transitions for images.",
+    "admin_dashboard": "Minimalist micro-interactions for feedback. No heavy animations."
+  },
+  "accessibility": {
+    "contrast": "Ensure APCA/WCAG AA compliance. Dark text on ivory, white text on dark overlays.",
+    "testing": "All interactive and key informational elements MUST include a 'data-testid' attribute (e.g., 'add-to-cart-btn', 'language-selector', 'admin-sidebar-link')."
+  },
+  "image_urls": {
+    "jelly_bags": [
+      {
+        "url": "https://images.unsplash.com/photo-1718254309963-49ce69a853df?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHx0cmFuc3BhcmVudCUyMGplbGx5JTIwdG90ZSUyMGJhZyUyMHBhc3RlbHxlbnwwfHx8fDE3ODQ3NTIzNzl8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Woman holding a clear bag (Hero/Collection)"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1556228578-6b39aba552d5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwzfHx0cmFuc3BhcmVudCUyMGplbGx5JTIwdG90ZSUyMGJhZyUyMHBhc3RlbHxlbnwwfHx8fDE3ODQ3NTIzNzl8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Woman wearing clear tote bag (Collection)"
+      }
+    ],
+    "brand_models": [
+      {
+        "url": "https://images.pexels.com/photos/14916457/pexels-photo-14916457.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Chic woman barefoot in white suit on black background (Brand Story / Histoire de la maison)"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1779406275908-1dabe4083373?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwzfHxsdXh1cnklMjBmYXNoaW9uJTIwbW9kZWwlMjBtaW5pbWFsaXN0fGVufDB8fHx8MTc4NDc1MjM3OXww&ixlib=rb-4.1.0&q=85",
+        "description": "Stylish woman in black dress on white (Editorial/Journal)"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1779406273777-38a6f61fb5fa?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHw0fHxsdXh1cnklMjBmYXNoaW9uJTIwbW9kZWwlMjBtaW5pbWFsaXN0fGVufDB8fHx8MTc4NDc1MjM3OXww&ixlib=rb-4.1.0&q=85",
+        "description": "Woman in black turtleneck and gold belt (Hero alternate / Values)"
+      }
+    ]
+  },
+  "universal_guidelines_for_main_agent": [
+    "You are using .js files not .tsx. Adjust imports and component syntax accordingly.",
+    "You MUST NOT apply universal transition (e.g., transition: all). Add transitions for specific interactive elements like button, input excluding transforms.",
+    "You MUST NOT center align the app container. Do not add text-align: center to body or main wrapper.",
+    "Every interaction needs micro-animations - hover states, transitions.",
+    "Use generous spacing. If typical design uses p-4, use p-8 or p-12.",
+    "Do not use transparent background in headers. Use backdrop-blur with bg-white/70 or solid color.",
+    "Toasts: Use sonner (located in /app/frontend/src/components/ui/sonner.js).",
+    "Never use AI assistant emoji characters for icons.",
+    "Prioritize using pre-existing Shadcn components from src/components/ui for complex interactions.",
+    "Use pure HTML/Tailwind for artistic layouts, Shadcn for logic-heavy components."
+  ]
+}
