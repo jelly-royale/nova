@@ -63,6 +63,7 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
+    "prebuild": "npm install --legacy-peer-deps",
     "test": "craco test"
   },
   "browserslist": {
